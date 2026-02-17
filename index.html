@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ЮристПро — АРМ</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial;
+      }
+      body {
+        display: flex;
+        height: 100vh;
+        background: #f4f6f9;
+        color: #333;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 240px;
+        background: #2f3e4e;
+        color: white;
+        padding: 20px;
+      }
+      .sidebar h2 {
+        margin-bottom: 30px;
+      }
+      .sidebar button {
+        width: 100%;
+        background: none;
+        border: none;
+        color: #cbd5e1;
+        padding: 12px;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        transition: 0.2s;
+      }
+      .sidebar button:hover,
+      .sidebar button.active {
+        background: #3b82f6;
+        color: white;
+      }
+
+      /* Main */
+      .main {
+        flex: 1;
+        padding: 30px;
+        overflow: auto;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+
+      /* Cards */
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        text-align: left;
+        background: #f1f5f9;
+      }
+
+      /* Forms */
+      input,
+      select {
+        padding: 8px;
+        margin: 5px 0;
+        width: 100%;
+      }
+      button.primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button.primary:hover {
+        background: #2563eb;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>ЮристПро</h2>
+      <button class="active" onclick="showSection('dashboard', this)">
+        Дашборд
+      </button>
+      <button onclick="showSection('cases', this)">Реестр дел</button>
+      <button onclick="showSection('clients', this)">Клиенты</button>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <h1 id="pageTitle">Рабочий стол</h1>
+        <div>Адвокат: Иванов И.И.</div>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="dashboard" class="section active">
+        <div class="card">
+          <h3>Статистика</h3>
+          <p>Всего клиентов: <b id="clientCount">0</b></p>
+          <p>Всего дел: <b id="caseCount">0</b></p>
+        </div>
+      </div>
+
+      <!-- Clients -->
+      <div id="clients" class="section">
+        <div class="card">
+          <h3>Добавить клиента</h3>
+          <input id="clientName" placeholder="ФИО клиента" />
+          <input id="clientPhone" placeholder="Телефон" />
+          <button class="primary" onclick="addClient()">Добавить</button>
+        </div>
+
+        <div class="card">
+          <h3>Список клиентов</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ФИО</th>
+                <th>Телефон</th>
+              </tr>
+            </thead>
+            <tbody id="clientList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cases -->
+      <div id="cases" class="section">
+        <div class="card">
+          <h3>Добавить дело</h3>
+          <input id="caseTitle" placeholder="Название дела" />
+          <select id="caseStatus">
+            <option value="В работе">В работе</option>
+            <option value="Завершено">Завершено</option>
+            <option value="Ожидание">Ожидание</option>
+          </select>
+          <button class="primary" onclick="addCase()">Добавить</button>
+        </div>
+
+        <div class="card">
+          <h3>Список дел</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="caseList"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let clients = JSON.parse(localStorage.getItem("clients")) || [];
+      let cases = JSON.parse(localStorage.getItem("cases")) || [];
+
+      function showSection(id, btn) {
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+
+        document
+          .querySelectorAll(".sidebar button")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        document.getElementById("pageTitle").innerText =
+          id === "dashboard"
+            ? "Рабочий стол"
+            : id === "clients"
+              ? "Клиенты"
+              : "Реестр дел";
+      }
+
+      function render() {
+        document.getElementById("clientList").innerHTML = clients
+          .map((c) => `<tr><td>${c.name}</td><td>${c.phone}</td></tr>`)
+          .join("");
+
+        document.getElementById("caseList").innerHTML = cases
+          .map((c) => `<tr><td>${c.title}</td><td>${c.status}</td></tr>`)
+          .join("");
+
+        document.getElementById("clientCount").innerText = clients.length;
+        document.getElementById("caseCount").innerText = cases.length;
+
+        localStorage.setItem("clients", JSON.stringify(clients));
+        localStorage.setItem("cases", JSON.stringify(cases));
+      }
+
+      function addClient() {
+        let name = clientName.value.trim();
+        let phone = clientPhone.value.trim();
+        if (!name) return alert("Введите имя клиента");
+        clients.push({ name, phone });
+        clientName.value = "";
+        clientPhone.value = "";
+        render();
+      }
+
+      function addCase() {
+        let title = caseTitle.value.trim();
+        let status = caseStatus.value;
+        if (!title) return alert("Введите название дела");
+        cases.push({ title, status });
+        caseTitle.value = "";
+        render();
+      }
+
+      render();
+    </script>
+  </body>
+</html>
