@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ЮристПро — АРМ</title>
+    <title>Юрист — АРМ</title>
 
     <style>
       * {
@@ -15,19 +15,20 @@
       body {
         display: flex;
         height: 100vh;
-        background: #f4f6f9;
+        background: #f1f5f9;
         color: #333;
       }
 
-      /* Sidebar */
+      /* SIDEBAR */
       .sidebar {
         width: 240px;
-        background: #2f3e4e;
+        background: #1e293b;
         color: white;
         padding: 20px;
+        transition: 0.3s;
       }
       .sidebar h2 {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
       }
       .sidebar button {
         width: 100%;
@@ -38,24 +39,31 @@
         text-align: left;
         cursor: pointer;
         border-radius: 6px;
-        margin-bottom: 8px;
-        transition: 0.2s;
+        margin-bottom: 6px;
       }
-      .sidebar button:hover,
-      .sidebar button.active {
+      .sidebar button.active,
+      .sidebar button:hover {
         background: #3b82f6;
         color: white;
       }
 
-      /* Main */
+      /* MOBILE MENU */
+      .menu-toggle {
+        display: none;
+        font-size: 22px;
+        cursor: pointer;
+      }
+
+      /* MAIN */
       .main {
         flex: 1;
-        padding: 30px;
+        padding: 20px;
         overflow: auto;
       }
       .topbar {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
       }
       .section {
@@ -65,93 +73,122 @@
         display: block;
       }
 
-      /* Cards */
       .card {
         background: white;
-        padding: 20px;
+        padding: 15px;
         border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 15px;
       }
 
-      /* Tables */
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      button.primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 5px;
+      }
+      button.danger {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button.small {
+        padding: 5px 6px;
+        font-size: 12px;
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
       }
       th,
       td {
-        padding: 10px;
+        padding: 8px;
         border-bottom: 1px solid #ddd;
+        font-size: 14px;
       }
       th {
         text-align: left;
-        background: #f1f5f9;
+        background: #f8fafc;
       }
 
-      /* Forms */
-      input,
-      select {
-        padding: 8px;
-        margin: 5px 0;
-        width: 100%;
-      }
-      button.primary {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
-      button.primary:hover {
-        background: #2563eb;
+      /* MOBILE */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+        .sidebar {
+          position: fixed;
+          left: -260px;
+          top: 0;
+          height: 100%;
+          z-index: 1000;
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .menu-toggle {
+          display: block;
+        }
       }
     </style>
   </head>
-
   <body>
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <h2>ЮристПро</h2>
       <button class="active" onclick="showSection('dashboard', this)">
-        Дашборд
+        Рабочий стол
       </button>
-      <button onclick="showSection('cases', this)">Реестр дел</button>
       <button onclick="showSection('clients', this)">Клиенты</button>
+      <button onclick="showSection('cases', this)">Дела</button>
     </div>
 
     <div class="main">
       <div class="topbar">
-        <h1 id="pageTitle">Рабочий стол</h1>
-        <div>Адвокат: Иванов И.И.</div>
+        <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+        <h2 id="pageTitle">Рабочий стол</h2>
+        <span>Власенко Я.Е</span>
       </div>
 
-      <!-- Dashboard -->
       <div id="dashboard" class="section active">
         <div class="card">
           <h3>Статистика</h3>
-          <p>Всего клиентов: <b id="clientCount">0</b></p>
-          <p>Всего дел: <b id="caseCount">0</b></p>
+          <p>Клиенты: <b id="clientCount">0</b></p>
+          <p>Дела: <b id="caseCount">0</b></p>
+          <p>В работе: <b id="activeCount">0</b></p>
         </div>
       </div>
 
-      <!-- Clients -->
       <div id="clients" class="section">
         <div class="card">
           <h3>Добавить клиента</h3>
-          <input id="clientName" placeholder="ФИО клиента" />
+          <input id="clientName" placeholder="ФИО" />
           <input id="clientPhone" placeholder="Телефон" />
           <button class="primary" onclick="addClient()">Добавить</button>
         </div>
 
         <div class="card">
-          <h3>Список клиентов</h3>
+          <input id="searchClient" placeholder="Поиск..." oninput="render()" />
           <table>
             <thead>
               <tr>
                 <th>ФИО</th>
                 <th>Телефон</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="clientList"></tbody>
@@ -159,26 +196,33 @@
         </div>
       </div>
 
-      <!-- Cases -->
       <div id="cases" class="section">
         <div class="card">
           <h3>Добавить дело</h3>
-          <input id="caseTitle" placeholder="Название дела" />
+          <input id="caseTitle" placeholder="Название" />
+          <select id="caseClient"></select>
           <select id="caseStatus">
-            <option value="В работе">В работе</option>
-            <option value="Завершено">Завершено</option>
-            <option value="Ожидание">Ожидание</option>
+            <option>В работе</option>
+            <option>Завершено</option>
+            <option>Ожидание</option>
           </select>
           <button class="primary" onclick="addCase()">Добавить</button>
         </div>
 
         <div class="card">
-          <h3>Список дел</h3>
+          <select id="filterStatus" onchange="render()">
+            <option value="">Все</option>
+            <option>В работе</option>
+            <option>Завершено</option>
+            <option>Ожидание</option>
+          </select>
           <table>
             <thead>
               <tr>
-                <th>Название</th>
+                <th>Дело</th>
+                <th>Клиент</th>
                 <th>Статус</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="caseList"></tbody>
@@ -191,6 +235,10 @@
       let clients = JSON.parse(localStorage.getItem("clients")) || [];
       let cases = JSON.parse(localStorage.getItem("cases")) || [];
 
+      function toggleMenu() {
+        sidebar.classList.toggle("open");
+      }
+
       function showSection(id, btn) {
         document
           .querySelectorAll(".section")
@@ -202,47 +250,105 @@
           .forEach((b) => b.classList.remove("active"));
         if (btn) btn.classList.add("active");
 
-        document.getElementById("pageTitle").innerText =
+        pageTitle.innerText =
           id === "dashboard"
             ? "Рабочий стол"
             : id === "clients"
               ? "Клиенты"
-              : "Реестр дел";
-      }
+              : "Дела";
 
-      function render() {
-        document.getElementById("clientList").innerHTML = clients
-          .map((c) => `<tr><td>${c.name}</td><td>${c.phone}</td></tr>`)
-          .join("");
-
-        document.getElementById("caseList").innerHTML = cases
-          .map((c) => `<tr><td>${c.title}</td><td>${c.status}</td></tr>`)
-          .join("");
-
-        document.getElementById("clientCount").innerText = clients.length;
-        document.getElementById("caseCount").innerText = cases.length;
-
-        localStorage.setItem("clients", JSON.stringify(clients));
-        localStorage.setItem("cases", JSON.stringify(cases));
+        sidebar.classList.remove("open");
       }
 
       function addClient() {
-        let name = clientName.value.trim();
-        let phone = clientPhone.value.trim();
-        if (!name) return alert("Введите имя клиента");
-        clients.push({ name, phone });
+        if (!clientName.value) return alert("Введите имя");
+        clients.push({
+          id: Date.now(),
+          name: clientName.value,
+          phone: clientPhone.value,
+        });
         clientName.value = "";
         clientPhone.value = "";
         render();
       }
 
+      function deleteClient(id) {
+        clients = clients.filter((c) => c.id !== id);
+        cases = cases.filter((c) => c.clientId !== id);
+        render();
+      }
+
       function addCase() {
-        let title = caseTitle.value.trim();
-        let status = caseStatus.value;
-        if (!title) return alert("Введите название дела");
-        cases.push({ title, status });
+        if (!caseTitle.value || !caseClient.value)
+          return alert("Заполните поля");
+        cases.push({
+          id: Date.now(),
+          title: caseTitle.value,
+          clientId: Number(caseClient.value),
+          status: caseStatus.value,
+        });
         caseTitle.value = "";
         render();
+      }
+
+      function deleteCase(id) {
+        cases = cases.filter((c) => c.id !== id);
+        render();
+      }
+
+      function changeStatus(id) {
+        let c = cases.find((c) => c.id === id);
+        if (c.status === "В работе") c.status = "Завершено";
+        else if (c.status === "Завершено") c.status = "Ожидание";
+        else c.status = "В работе";
+        render();
+      }
+
+      function render() {
+        localStorage.setItem("clients", JSON.stringify(clients));
+        localStorage.setItem("cases", JSON.stringify(cases));
+
+        // Clients
+        let search = searchClient?.value?.toLowerCase() || "";
+        clientList.innerHTML = clients
+          .filter((c) => c.name.toLowerCase().includes(search))
+          .map(
+            (c) => `
+        <tr>
+            <td>${c.name}</td>
+            <td>${c.phone}</td>
+            <td><button class="danger small" onclick="deleteClient(${c.id})">X</button></td>
+        </tr>`,
+          )
+          .join("");
+
+        // Dropdown
+        caseClient.innerHTML =
+          `<option value="">Выберите клиента</option>` +
+          clients
+            .map((c) => `<option value="${c.id}">${c.name}</option>`)
+            .join("");
+
+        // Cases
+        let filter = filterStatus.value;
+        caseList.innerHTML = cases
+          .filter((c) => !filter || c.status === filter)
+          .map((c) => {
+            let client = clients.find((cl) => cl.id === c.clientId);
+            return `<tr>
+                <td>${c.title}</td>
+                <td>${client ? client.name : "—"}</td>
+                <td onclick="changeStatus(${c.id})" style="cursor:pointer">${c.status}</td>
+                <td><button class="danger small" onclick="deleteCase(${c.id})">X</button></td>
+            </tr>`;
+          })
+          .join("");
+
+        clientCount.innerText = clients.length;
+        caseCount.innerText = cases.length;
+        activeCount.innerText = cases.filter(
+          (c) => c.status === "В работе",
+        ).length;
       }
 
       render();
